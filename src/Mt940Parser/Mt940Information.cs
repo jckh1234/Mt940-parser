@@ -8,8 +8,9 @@ using Mt940Parser.Parsing;
 namespace Mt940Parser
 {
     /// <summary>
-    /// Structured :86: narrative. German <c>?00</c> fields and <c>/CODE/</c> (and <c>CODE+</c>) fields
-    /// are both exposed. Convenience properties prefer SEPA purpose and name when those codes are present.
+    /// Structured :86: narrative. German <c>?00</c> fields, SEPA <c>/CODE/</c> (and <c>CODE+</c>) fields,
+    /// and DBS Hong Kong Appendix 2 prefixes are all exposed.
+    /// Convenience properties prefer SEPA purpose and name when those codes are present.
     /// </summary>
     public sealed class Mt940Information
     {
@@ -36,7 +37,7 @@ namespace Mt940Parser
             CounterpartyName = germanName ?? FirstCode("NAME", "BENM", "ORDP");
 
             EndToEndReference = GetCode("EREF");
-            CustomerReference = GetCode("KREF");
+            CustomerReference = GetCode(DbsField86Prefixes.CustomerReferencePrefix) ?? GetCode("KREF");
             MandateReference = GetCode("MREF");
             CreditorIdentifier = GetCode("CRED");
             SepaPurpose = GetCode("SVWZ");
@@ -80,7 +81,8 @@ namespace Mt940Parser
         public IReadOnlyDictionary<string, string> GermanFields { get; }
 
         /// <summary>
-        /// <c>/CODE/</c> and <c>CODE+</c> fields. Keys are uppercase codes such as "EREF" and "SVWZ".
+        /// <c>/CODE/</c> and <c>CODE+</c> fields, including every DBS Appendix 2 prefix
+        /// (<see cref="DbsField86Prefixes"/>). Keys are uppercase codes such as "CREF", "OTH1", "EREF", and "SVWZ".
         /// Slash form wins when the same code appears in both forms.
         /// </summary>
         public IReadOnlyDictionary<string, string> CodeFields { get; }
@@ -121,7 +123,9 @@ namespace Mt940Parser
         /// <summary>End-to-end reference (EREF).</summary>
         public string EndToEndReference { get; }
 
-        /// <summary>Customer reference (KREF).</summary>
+        /// <summary>
+        /// Customer reference. DBS <c>/CREF/</c> when that prefix is present, otherwise SEPA <c>/KREF/</c>.
+        /// </summary>
         public string CustomerReference { get; }
 
         /// <summary>Mandate reference (MREF).</summary>

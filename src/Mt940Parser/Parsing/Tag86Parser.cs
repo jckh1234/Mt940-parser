@@ -10,9 +10,9 @@ namespace Mt940Parser.Parsing
             @"\?(\d{2})",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-        private static readonly Regex SlashCode = new Regex(
-            @"/([A-Z]{2,4})/",
-            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        // Letter codes stay generic. DBS prefixes that contain digits (OTH1, OTH2, OTH3)
+        // come from DbsField86Prefixes so they are recognized with the rest of that table.
+        private static readonly Regex SlashCode = BuildSlashCodePattern();
 
         private static readonly Regex PlusCode = new Regex(
             @"(EREF|KREF|MREF|CRED|DEBT|SVWZ|ABWA|ABWE|PURP)\+",
@@ -115,6 +115,40 @@ namespace Mt940Parser.Parsing
             for (int i = 0; i < text.Length; i++)
             {
                 if (!char.IsDigit(text[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static Regex BuildSlashCodePattern()
+        {
+            var digitPrefixes = new List<string>();
+            foreach (var prefix in DbsField86Prefixes.FieldNames.Keys)
+            {
+                if (!IsUpperLetters(prefix))
+                    digitPrefixes.Add(Regex.Escape(prefix));
+            }
+
+            digitPrefixes.Sort(delegate(string left, string right)
+            {
+                return right.Length.CompareTo(left.Length);
+            });
+
+            var pattern = digitPrefixes.Count == 0
+                ? @"/([A-Z]{2,4})/"
+                : "/(" + string.Join("|", digitPrefixes.ToArray()) + "|[A-Z]{2,4})/";
+            return new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        }
+
+        private static bool IsUpperLetters(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return false;
+            for (int i = 0; i < text.Length; i++)
+            {
+                var ch = text[i];
+                if (ch < 'A' || ch > 'Z')
                     return false;
             }
 
