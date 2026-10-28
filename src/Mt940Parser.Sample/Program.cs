@@ -61,12 +61,13 @@ namespace Mt940Parser.Sample
                     var purpose = tx.Information == null ? null : tx.Information.Purpose;
                     Console.WriteLine(string.Format(
                         CultureInfo.InvariantCulture,
-                        "  {0:yyyy-MM-dd} {1,-2} {2,12:0.00} {3} {4}",
+                        "  {0:yyyy-MM-dd} {1,-2} {2,12:0.00} {3} {4} CustomerReference={5}",
                         tx.ValueDate,
                         tx.Mark.ToSwiftCode(),
                         tx.SignedAmount,
                         tx.Reference ?? "",
-                        purpose ?? ""));
+                        purpose ?? "",
+                        tx.CustomerReference ?? ""));
                 }
 
                 PrintBalance("Closing", statement.ClosingBalance);
