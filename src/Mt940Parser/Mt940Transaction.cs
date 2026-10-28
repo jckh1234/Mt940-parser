@@ -79,6 +79,15 @@ namespace Mt940Parser
         /// <summary>:86: narrative attached to this line. Null when the line has no :86:.</summary>
         public Mt940Information Information { get; }
 
+        /// <summary>
+        /// Customer reference from <see cref="Information"/>. DBS <c>/CREF/</c> wins over SEPA <c>/KREF/</c>.
+        /// Null when the line has no narrative or neither code.
+        /// </summary>
+        public string CustomerReference
+        {
+            get { return Information == null ? null : Information.CustomerReference; }
+        }
+
         /// <summary>Original :61: body, including supplementary lines.</summary>
         public string Raw { get; }
 

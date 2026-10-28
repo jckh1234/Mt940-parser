@@ -91,6 +91,7 @@ Both common layouts are read from the same narrative:
 
 - German fields: an optional 3-digit code, then `?00` posting text, `?10` primanota, `?20`–`?29` purpose, `?30` bank code, `?31` account, `?32`–`?33` name. Line wraps are joined before the codes are split, so a BIC broken across a 65-character line is reconstructed.
 - Structured codes: `/EREF/`, `/KREF/`, `/MREF/`, `/CRED/`, `/SVWZ/`, `/IBAN/`, `/BIC/`, `/NAME/`, and any other `/CODE/` of 2–4 letters. The `CODE+value` form (`EREF+`, `SVWZ+`, …) is read as well. When both forms carry the same code, the slash form wins.
+- DBS Hong Kong Appendix 2 prefixes are registered in `DbsField86Prefixes` and stored on `CodeFields`: `TD`, `BENM`, `BB`, `BA`, `REMI`, `EXCH`, `RA`, `ORDP`, `OB`, `OTH1`, `OTH2`, `OTH3`, `DF`, `BC`, `CREF`, `CRFX`, `OA`, `PREF`, `PURP`, `PV`, `VA`, `VN`. Line wraps are joined before the prefixes are split. `CustomerReference` (on the transaction and on `Mt940Information`) is the `/CREF/` value. When `/CREF/` is absent, `/KREF/` is used instead.
 
 `Purpose` prefers `SVWZ`, then German `?20`–`?29` concatenated, then `REMI`, then the whole text when it has no codes. `CounterpartyIban` and `CounterpartyBic` are filled from `/IBAN/` and `/BIC/` or from `?31` and `?30` when those fields match.
 

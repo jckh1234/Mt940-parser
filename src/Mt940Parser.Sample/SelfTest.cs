@@ -13,6 +13,7 @@ namespace Mt940Parser.Sample
             AssertSample(document);
             AssertRoundTrip(text, path);
             AssertInlineCases();
+            AssertDbsField86();
         }
 
         private static void AssertSample(Mt940Document document)
@@ -405,6 +406,51 @@ namespace Mt940Parser.Sample
             Equal("minimal", "ONLY", minimal.Statements[0].TransactionReference);
             Equal("minimal tx", 0, minimal.Statements[0].Transactions.Count);
             Null("minimal open", minimal.Statements[0].OpeningBalance);
+        }
+
+        private static void AssertDbsField86()
+        {
+            Equal("dbs prefix count", 22, DbsField86Prefixes.FieldNames.Count);
+            Equal("dbs cref name", "Customer Reference", DbsField86Prefixes.GetFieldName("CREF"));
+            Equal("dbs cref name lower", "Customer Reference", DbsField86Prefixes.GetFieldName("cref"));
+            Equal("dbs oth1 name", "TRANS PARTICULAR", DbsField86Prefixes.FieldNames["OTH1"]);
+
+            var statement = Mt940Document.Parse(@"
+:20:DBS
+:25:001234567
+:61:260101C100,00NTRFNONREF
+:86:/TD/INCOMING ACT/BENM/ACME LTD
+/CREF/SOME_REF/OTH1/PARTICULAR/OTH2/REMARK ONE/OTH3/MORE
+/REMI/INV/2026/RA/HKD100,00/ORDP/PAYER CO/BC/DBSSSGSG
+").Statements[0];
+
+            var tx = statement.Transactions[0];
+            Equal("61 ref stays NONREF", "NONREF", tx.Reference);
+            Equal("tx cref", "SOME_REF", tx.CustomerReference);
+            Equal("info cref", "SOME_REF", tx.Information.CustomerReference);
+            Equal("code cref", "SOME_REF", tx.Information.GetCodeField("CREF"));
+            Equal("dbs td", "INCOMING ACT", tx.Information.GetCodeField("TD"));
+            Equal("dbs benm", "ACME LTD", tx.Information.GetCodeField("BENM"));
+            Equal("dbs oth1", "PARTICULAR", tx.Information.GetCodeField("OTH1"));
+            Equal("dbs oth2", "REMARK ONE", tx.Information.GetCodeField("OTH2"));
+            Equal("dbs oth3", "MORE", tx.Information.GetCodeField("OTH3"));
+            Equal("dbs remi", "INV/2026", tx.Information.RemittanceInformation);
+            Equal("dbs ra", "HKD100,00", tx.Information.GetCodeField("RA"));
+            Equal("dbs ordp", "PAYER CO", tx.Information.GetCodeField("ORDP"));
+            Equal("dbs bc", "DBSSSGSG", tx.Information.GetCodeField("BC"));
+            Equal("name from benm", "ACME LTD", tx.Information.CounterpartyName);
+
+            var both = Mt940Document.Parse(@"
+:20:BOTH
+:25:1
+:61:260101C1,00NTRFREF
+:86:/KREF/SEPAREF/CREF/SOME_REF
+").Statements[0].Transactions[0];
+            Equal("cref wins", "SOME_REF", both.CustomerReference);
+            Equal("kref kept", "SEPAREF", both.Information.GetCodeField("KREF"));
+
+            var bare = Mt940Document.Parse(":20:X\n:61:260101C1,00NTRFNONREF\n").Statements[0].Transactions[0];
+            Null("no narrative cref", bare.CustomerReference);
         }
 
         private static void Equal(string name, object expected, object actual)
