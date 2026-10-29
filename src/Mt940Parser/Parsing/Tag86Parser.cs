@@ -25,19 +25,37 @@ namespace Mt940Parser.Parsing
             var normalized = original.Replace("\r", string.Empty).Replace("\n", string.Empty);
             var german = new Dictionary<string, string>(StringComparer.Ordinal);
             string transactionCode = null;
+            var codes = new Dictionary<string, string>(StringComparer.Ordinal);
+
+            // Structured ?CODE?value matches are found first. A numeric value such as
+            // PV?10000006, OTH1?260909..., or BC?004 must not be read as a German ?dd subfield.
+            var questionMatches = QuestionCode.Matches(normalized);
+            AddQuestionCodes(normalized, questionMatches, codes);
 
             var separators = GermanSeparator.Matches(normalized);
-            if (separators.Count > 0)
+            var firstKept = FirstKeptSeparator(separators, questionMatches);
+            if (firstKept >= 0)
             {
-                var head = normalized.Substring(0, separators[0].Index).Trim();
+                var head = normalized.Substring(0, separators[firstKept].Index).Trim();
                 if (head.Length == 3 && IsDigits(head))
                     transactionCode = head;
 
-                for (int i = 0; i < separators.Count; i++)
+                for (int i = firstKept; i < separators.Count; i++)
                 {
+                    if (IsQuestionValueSeparator(separators[i].Index, questionMatches))
+                        continue;
+
                     var code = separators[i].Groups[1].Value;
                     var start = separators[i].Index + separators[i].Length;
-                    var end = i + 1 < separators.Count ? separators[i + 1].Index : normalized.Length;
+                    var end = normalized.Length;
+                    for (int j = i + 1; j < separators.Count; j++)
+                    {
+                        if (IsQuestionValueSeparator(separators[j].Index, questionMatches))
+                            continue;
+                        end = separators[j].Index;
+                        break;
+                    }
+
                     var value = normalized.Substring(start, end - start).Trim();
                     if (value.Length == 0)
                         continue;
@@ -50,9 +68,6 @@ namespace Mt940Parser.Parsing
                 }
             }
 
-            var codes = new Dictionary<string, string>(StringComparer.Ordinal);
-            AddQuestionCodes(normalized, codes);
-
             foreach (var field in german.Values)
                 AddPlusCodes(field, codes);
 
@@ -60,9 +75,8 @@ namespace Mt940Parser.Parsing
             return new Mt940Information(original.Trim(), transactionCode, german, codes);
         }
 
-        private static void AddQuestionCodes(string text, Dictionary<string, string> codes)
+        private static void AddQuestionCodes(string text, MatchCollection matches, Dictionary<string, string> codes)
         {
-            var matches = QuestionCode.Matches(text);
             for (int i = 0; i < matches.Count; i++)
             {
                 var code = matches[i].Groups[1].Value;
@@ -70,6 +84,31 @@ namespace Mt940Parser.Parsing
                 var end = i + 1 < matches.Count ? matches[i + 1].Index : text.Length;
                 AddIfMissing(codes, code, text.Substring(start, end - start).Trim());
             }
+        }
+
+        private static int FirstKeptSeparator(MatchCollection separators, MatchCollection questionMatches)
+        {
+            for (int i = 0; i < separators.Count; i++)
+            {
+                if (!IsQuestionValueSeparator(separators[i].Index, questionMatches))
+                    return i;
+            }
+
+            return -1;
+        }
+
+        // The final '?' of a ?CODE? or CODE? match is the value separator. German ?dd
+        // detection must not treat that same '?' as a subfield when the value is numeric.
+        private static bool IsQuestionValueSeparator(int index, MatchCollection questionMatches)
+        {
+            for (int i = 0; i < questionMatches.Count; i++)
+            {
+                var match = questionMatches[i];
+                if (match.Length > 0 && match.Index + match.Length - 1 == index)
+                    return true;
+            }
+
+            return false;
         }
 
         private static void AddPlusCodes(string text, Dictionary<string, string> codes)

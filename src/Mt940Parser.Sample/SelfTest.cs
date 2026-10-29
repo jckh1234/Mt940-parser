@@ -14,6 +14,7 @@ namespace Mt940Parser.Sample
             AssertRoundTrip(text, path);
             AssertInlineCases();
             AssertDbsField86();
+            DbsSelfTest.Run();
         }
 
         private static void AssertSample(Mt940Document document)
@@ -104,6 +105,9 @@ namespace Mt940Parser.Sample
             Equal("tx4 ref", "REFWITHFUNDS", funds.Reference);
             Equal("tx4 bank", "B1", funds.BankReference);
             Equal("tx4 supp", "FEE WAIVED", funds.SupplementaryDetails);
+            Null("tx4 dbs code", funds.DbsTransactionCode);
+            Null("tx4 dbs time", funds.SupplementaryTimestamp);
+            True("tx4 is credit", funds.IsCredit);
             Equal("tx4 gvc", "805", funds.Information.TransactionCode);
             Equal("tx4 booking", "ENTGELT", funds.Information.BookingText);
             Equal("tx4 german 20", "?EREF?FEE-15?SVWZ?Kontofuehrung Oktober", funds.Information.GetGermanField("20"));
