@@ -15,5 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\samples\statement.sta" Link="samples\statement.sta" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\samples\MT940.D260909.txt" Link="samples\MT940.D260909.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

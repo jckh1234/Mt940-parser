@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mt940Parser", "src\Mt940Par
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mt940Parser.Sample", "src\Mt940Parser.Sample\Mt940Parser.Sample.csproj", "{C3A91F72-5E44-4B18-8D06-2F7C9A1E6D53}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mt940Parser.Scheduler", "src\Mt940Parser.Scheduler\Mt940Parser.Scheduler.csproj", "{E7A4C2B1-8F63-4D19-9A70-3C5E1B8D6F24}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{C3A91F72-5E44-4B18-8D06-2F7C9A1E6D53}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3A91F72-5E44-4B18-8D06-2F7C9A1E6D53}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3A91F72-5E44-4B18-8D06-2F7C9A1E6D53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7A4C2B1-8F63-4D19-9A70-3C5E1B8D6F24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7A4C2B1-8F63-4D19-9A70-3C5E1B8D6F24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7A4C2B1-8F63-4D19-9A70-3C5E1B8D6F24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7A4C2B1-8F63-4D19-9A70-3C5E1B8D6F24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
