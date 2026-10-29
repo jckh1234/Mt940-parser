@@ -6,11 +6,12 @@ namespace Mt940Parser
 {
     /// <summary>
     /// DBS Hong Kong Limited Appendix 2 prefixes for structured Field 86 (<c>:86:</c>).
-    /// Keys are the <c>/PREFIX/</c> codes. Values are the field names from that table.
+    /// Keys are the prefix codes. <c>?</c> separates each prefix from its value
+    /// (<c>?PREFIX?value</c>, or <c>PREFIX?value</c> at the start of the narrative).
     /// </summary>
     public static class DbsField86Prefixes
     {
-        /// <summary>Prefix whose value is the customer reference (<c>/CREF/</c>).</summary>
+        /// <summary>Prefix whose value is the customer reference (<c>?CREF?</c>).</summary>
         public const string CustomerReferencePrefix = "CREF";
 
         private static readonly Dictionary<string, string> Names = new Dictionary<string, string>(StringComparer.Ordinal)

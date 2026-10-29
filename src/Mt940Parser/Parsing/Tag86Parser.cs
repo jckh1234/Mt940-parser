@@ -10,9 +10,10 @@ namespace Mt940Parser.Parsing
             @"\?(\d{2})",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
+        // '?' is the value separator: ?CODE?value, or CODE?value at the start of the narrative.
         // Letter codes stay generic. DBS prefixes that contain digits (OTH1, OTH2, OTH3)
         // come from DbsField86Prefixes so they are recognized with the rest of that table.
-        private static readonly Regex SlashCode = BuildSlashCodePattern();
+        private static readonly Regex QuestionCode = BuildQuestionCodePattern();
 
         private static readonly Regex PlusCode = new Regex(
             @"(EREF|KREF|MREF|CRED|DEBT|SVWZ|ABWA|ABWE|PURP)\+",
@@ -50,7 +51,7 @@ namespace Mt940Parser.Parsing
             }
 
             var codes = new Dictionary<string, string>(StringComparer.Ordinal);
-            AddSlashCodes(normalized, codes);
+            AddQuestionCodes(normalized, codes);
 
             foreach (var field in german.Values)
                 AddPlusCodes(field, codes);
@@ -59,9 +60,9 @@ namespace Mt940Parser.Parsing
             return new Mt940Information(original.Trim(), transactionCode, german, codes);
         }
 
-        private static void AddSlashCodes(string text, Dictionary<string, string> codes)
+        private static void AddQuestionCodes(string text, Dictionary<string, string> codes)
         {
-            var matches = SlashCode.Matches(text);
+            var matches = QuestionCode.Matches(text);
             for (int i = 0; i < matches.Count; i++)
             {
                 var code = matches[i].Groups[1].Value;
@@ -121,7 +122,7 @@ namespace Mt940Parser.Parsing
             return true;
         }
 
-        private static Regex BuildSlashCodePattern()
+        private static Regex BuildQuestionCodePattern()
         {
             var digitPrefixes = new List<string>();
             foreach (var prefix in DbsField86Prefixes.FieldNames.Keys)
@@ -135,10 +136,16 @@ namespace Mt940Parser.Parsing
                 return right.Length.CompareTo(left.Length);
             });
 
-            var pattern = digitPrefixes.Count == 0
-                ? @"/([A-Z]{2,4})/"
-                : "/(" + string.Join("|", digitPrefixes.ToArray()) + "|[A-Z]{2,4})/";
-            return new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
+            // The '?' after the code is the value separator. A leading '?' wraps the code
+            // (?CODE?value); the first code may also sit at the start (CODE?value).
+            // The '?' that introduces the next code is part of that match, so it is not
+            // included in the previous value.
+            var body = digitPrefixes.Count == 0
+                ? "[A-Z]{2,4}"
+                : string.Join("|", digitPrefixes.ToArray()) + "|[A-Z]{2,4}";
+            return new Regex(
+                "(?:^|\\?)(" + body + ")\\?",
+                RegexOptions.Compiled | RegexOptions.CultureInvariant);
         }
 
         private static bool IsUpperLetters(string text)
