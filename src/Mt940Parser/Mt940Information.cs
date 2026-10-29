@@ -8,7 +8,7 @@ using Mt940Parser.Parsing;
 namespace Mt940Parser
 {
     /// <summary>
-    /// Structured :86: narrative. German <c>?00</c> fields, SEPA <c>/CODE/</c> (and <c>CODE+</c>) fields,
+    /// Structured :86: narrative. German <c>?00</c> fields, structured <c>?CODE?</c> (and <c>CODE+</c>) fields,
     /// and DBS Hong Kong Appendix 2 prefixes are all exposed.
     /// Convenience properties prefer SEPA purpose and name when those codes are present.
     /// </summary>
@@ -81,9 +81,9 @@ namespace Mt940Parser
         public IReadOnlyDictionary<string, string> GermanFields { get; }
 
         /// <summary>
-        /// <c>/CODE/</c> and <c>CODE+</c> fields, including every DBS Appendix 2 prefix
+        /// <c>?CODE?</c> and <c>CODE+</c> fields, including every DBS Appendix 2 prefix
         /// (<see cref="DbsField86Prefixes"/>). Keys are uppercase codes such as "CREF", "OTH1", "EREF", and "SVWZ".
-        /// Slash form wins when the same code appears in both forms.
+        /// The <c>?</c> form wins when the same code appears in both forms.
         /// </summary>
         public IReadOnlyDictionary<string, string> CodeFields { get; }
 
@@ -94,8 +94,8 @@ namespace Mt940Parser
         public string Primanota { get; }
 
         /// <summary>
-        /// Best purpose text: /SVWZ/ or SVWZ+, otherwise ?20 through ?29 concatenated,
-        /// otherwise /REMI/, otherwise the whole narrative when it has no codes.
+        /// Best purpose text: ?SVWZ? or SVWZ+, otherwise ?20 through ?29 concatenated,
+        /// otherwise ?REMI?, otherwise the whole narrative when it has no codes.
         /// </summary>
         public string Purpose { get; }
 
@@ -114,17 +114,17 @@ namespace Mt940Parser
         /// <summary>Raw ?31 account number or IBAN.</summary>
         public string CounterpartyAccount { get; }
 
-        /// <summary>Counterparty IBAN from /IBAN/ or from ?31 when that field is an IBAN.</summary>
+        /// <summary>Counterparty IBAN from ?IBAN? or from ?31 when that field is an IBAN.</summary>
         public string CounterpartyIban { get; }
 
-        /// <summary>Counterparty BIC from /BIC/ or from ?30 when that field is a BIC.</summary>
+        /// <summary>Counterparty BIC from ?BIC? or from ?30 when that field is a BIC.</summary>
         public string CounterpartyBic { get; }
 
         /// <summary>End-to-end reference (EREF).</summary>
         public string EndToEndReference { get; }
 
         /// <summary>
-        /// Customer reference. DBS <c>/CREF/</c> when that prefix is present, otherwise SEPA <c>/KREF/</c>.
+        /// Customer reference. DBS <c>?CREF?</c> when that prefix is present, otherwise <c>?KREF?</c>.
         /// </summary>
         public string CustomerReference { get; }
 
@@ -142,7 +142,7 @@ namespace Mt940Parser
             return GetGerman(code);
         }
 
-        /// <summary>Returns the /CODE/ field, or null. Lookup is case-insensitive.</summary>
+        /// <summary>Returns the ?CODE? field, or null. Lookup is case-insensitive.</summary>
         public string GetCodeField(string code)
         {
             if (code == null)

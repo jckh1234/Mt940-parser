@@ -80,7 +80,7 @@ namespace Mt940Parser
         public Mt940Information Information { get; }
 
         /// <summary>
-        /// Customer reference from <see cref="Information"/>. DBS <c>/CREF/</c> wins over SEPA <c>/KREF/</c>.
+        /// Customer reference from <see cref="Information"/>. DBS <c>?CREF?</c> wins over <c>?KREF?</c>.
         /// Null when the line has no narrative or neither code.
         /// </summary>
         public string CustomerReference

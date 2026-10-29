@@ -106,7 +106,7 @@ namespace Mt940Parser.Sample
             Equal("tx4 supp", "FEE WAIVED", funds.SupplementaryDetails);
             Equal("tx4 gvc", "805", funds.Information.TransactionCode);
             Equal("tx4 booking", "ENTGELT", funds.Information.BookingText);
-            Equal("tx4 german 20", "/EREF/FEE-15/SVWZ/Kontofuehrung Oktober", funds.Information.GetGermanField("20"));
+            Equal("tx4 german 20", "?EREF?FEE-15?SVWZ?Kontofuehrung Oktober", funds.Information.GetGermanField("20"));
             Equal("tx4 eref", "FEE-15", funds.Information.EndToEndReference);
             Equal("tx4 svwz", "Kontofuehrung Oktober", funds.Information.SepaPurpose);
             Equal("tx4 purpose", "Kontofuehrung Oktober", funds.Information.Purpose);
@@ -419,9 +419,9 @@ namespace Mt940Parser.Sample
 :20:DBS
 :25:001234567
 :61:260101C100,00NTRFNONREF
-:86:/TD/INCOMING ACT/BENM/ACME LTD
-/CREF/SOME_REF/OTH1/PARTICULAR/OTH2/REMARK ONE/OTH3/MORE
-/REMI/INV/2026/RA/HKD100,00/ORDP/PAYER CO/BC/DBSSSGSG
+:86:?TD?INCOMING ACT?BENM?ACME LTD
+?CREF?SOME_REF?OTH1?PARTICULAR?OTH2?REMARK ONE?OTH3?MORE
+?REMI?INV/2026?RA?HKD100,00?ORDP?PAYER CO?BC?DBSSSGSG
 ").Statements[0];
 
             var tx = statement.Transactions[0];
@@ -444,13 +444,17 @@ namespace Mt940Parser.Sample
 :20:BOTH
 :25:1
 :61:260101C1,00NTRFREF
-:86:/KREF/SEPAREF/CREF/SOME_REF
+:86:KREF?SEPAREF?CREF?SOME_REF
 ").Statements[0].Transactions[0];
             Equal("cref wins", "SOME_REF", both.CustomerReference);
             Equal("kref kept", "SEPAREF", both.Information.GetCodeField("KREF"));
 
             var bare = Mt940Document.Parse(":20:X\n:61:260101C1,00NTRFNONREF\n").Statements[0].Transactions[0];
             Null("no narrative cref", bare.CustomerReference);
+
+            var slash = Mt940Document.Parse(":20:SLASH\n:61:260101C1,00NTRFREF\n:86:/CREF/SOME_REF\n").Statements[0].Transactions[0];
+            Null("slash cref ignored", slash.CustomerReference);
+            Null("slash code ignored", slash.Information.GetCodeField("CREF"));
         }
 
         private static void Equal(string name, object expected, object actual)
