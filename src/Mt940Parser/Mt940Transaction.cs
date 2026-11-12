@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using Mt940Parser.Parsing;
 
 namespace Mt940Parser
 {
@@ -41,6 +42,18 @@ namespace Mt940Parser
             SupplementaryDetails = string.IsNullOrEmpty(supplementaryDetails) ? null : supplementaryDetails;
             Information = information;
             Raw = raw ?? string.Empty;
+
+            string dbsTransactionCode;
+            string supplementaryTimestamp;
+            string termDepositAccount;
+            SupplementaryDetailsParser.Read(
+                SupplementaryDetails,
+                out dbsTransactionCode,
+                out supplementaryTimestamp,
+                out termDepositAccount);
+            DbsTransactionCode = dbsTransactionCode;
+            SupplementaryTimestamp = supplementaryTimestamp;
+            TermDepositAccount = termDepositAccount;
         }
 
         /// <summary>Value date (YYMMDD).</summary>
@@ -75,6 +88,41 @@ namespace Mt940Parser
 
         /// <summary>Supplementary details from continuation lines of :61:. Null when absent.</summary>
         public string SupplementaryDetails { get; }
+
+        /// <summary>
+        /// DBS transaction code from supplementary details (<c>201?100913</c> → <c>201</c>).
+        /// Null when the supplementary line is not <c>code?HHMMSS</c>.
+        /// </summary>
+        public string DbsTransactionCode { get; }
+
+        /// <summary>
+        /// Posting timestamp (HHMMSS) from :61: supplementary details.
+        /// For <c>201?100913</c> this is <c>100913</c>. Null when the line has no timestamp.
+        /// </summary>
+        public string SupplementaryTimestamp { get; }
+
+        /// <summary>
+        /// Term-deposit account number from supplementary details, when the bank sends a third
+        /// <c>?</c> value after the timestamp. Null when absent.
+        /// </summary>
+        public string TermDepositAccount { get; }
+
+        /// <summary>
+        /// Appendix 1 description for <see cref="DbsTransactionCode"/>.
+        /// When several rows share a code, descriptions are joined with " / ". Null when the code is unknown.
+        /// </summary>
+        public string DbsTransactionDescription
+        {
+            get { return DbsTransactionCodes.Describe(DbsTransactionCode); }
+        }
+
+        /// <summary>
+        /// True when the debit/credit indicator is C. Reversals and expected credits are not included.
+        /// </summary>
+        public bool IsCredit
+        {
+            get { return Mark == DebitCreditMark.Credit; }
+        }
 
         /// <summary>:86: narrative attached to this line. Null when the line has no :86:.</summary>
         public Mt940Information Information { get; }

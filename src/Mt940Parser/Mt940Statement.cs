@@ -37,6 +37,16 @@ namespace Mt940Parser
         /// <summary>Transaction reference from :20:.</summary>
         public string TransactionReference { get; }
 
+        /// <summary>
+        /// Account number from :20: under the DBS Hong Kong MT940 guide.
+        /// DBS places the account number (10 to 20 characters) in Field 20.
+        /// This is the same string as <see cref="TransactionReference"/>.
+        /// </summary>
+        public string DbsAccountNumber
+        {
+            get { return TransactionReference; }
+        }
+
         /// <summary>Related reference from :21:. Null when the tag is absent.</summary>
         public string RelatedReference { get; }
 

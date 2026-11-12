@@ -51,7 +51,11 @@ namespace Mt940Parser.Sample
                 if (statement.RelatedReference != null)
                     Console.WriteLine("  Related: " + statement.RelatedReference);
                 if (statement.Account != null)
+                {
                     Console.WriteLine("  Account: " + statement.Account.Raw);
+                    if (statement.Account.AccountName != null)
+                        Console.WriteLine("  Name:    " + statement.Account.AccountName);
+                }
                 if (statement.StatementNumber != null)
                     Console.WriteLine("  Number:  " + statement.StatementNumber.Raw + " (" + statement.StatementNumber.SourceTag + ")");
                 PrintBalance("Opening", statement.OpeningBalance);
@@ -68,6 +72,7 @@ namespace Mt940Parser.Sample
                         tx.Reference ?? "",
                         purpose ?? "",
                         tx.CustomerReference ?? ""));
+                    PrintDbs(tx);
                 }
 
                 PrintBalance("Closing", statement.ClosingBalance);
@@ -77,6 +82,32 @@ namespace Mt940Parser.Sample
                 if (statement.Information != null && statement.Information.Purpose != null)
                     Console.WriteLine("  Info: " + statement.Information.Purpose);
             }
+        }
+
+        private static void PrintDbs(Mt940Transaction tx)
+        {
+            var info = tx.Information;
+            var hasNarrative = info != null && (
+                info.TransactionDescription != null
+                || info.FpsProxy != null
+                || info.PayerName != null
+                || info.TransParticular != null
+                || info.PaymentPurposeCode != null
+                || info.RemittanceBankBicCode != null);
+            if (tx.SupplementaryTimestamp == null && tx.DbsTransactionCode == null && !hasNarrative)
+                return;
+
+            Console.WriteLine(string.Format(
+                CultureInfo.InvariantCulture,
+                "    Time={0} DbsCode={1} TD={2} PV={3} ORDP={4} OTH1={5} PURP={6} BC={7}",
+                tx.SupplementaryTimestamp ?? "",
+                tx.DbsTransactionCode ?? "",
+                info == null ? "" : (info.TransactionDescription ?? ""),
+                info == null ? "" : (info.FpsProxy ?? ""),
+                info == null ? "" : (info.PayerName ?? ""),
+                info == null ? "" : (info.TransParticular ?? ""),
+                info == null ? "" : (info.PaymentPurposeCode ?? ""),
+                info == null ? "" : (info.RemittanceBankBicCode ?? "")));
         }
 
         private static void PrintBalance(string label, Balance balance)

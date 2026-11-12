@@ -42,6 +42,13 @@ namespace Mt940Parser
             CreditorIdentifier = GetCode("CRED");
             SepaPurpose = GetCode("SVWZ");
             RemittanceInformation = GetCode("REMI");
+            TransactionDescription = GetCode("TD");
+            BeneficiaryName = GetCode("BENM");
+            FpsProxy = GetCode("PV");
+            PayerName = GetCode("ORDP");
+            TransParticular = GetCode("OTH1");
+            PaymentPurposeCode = GetCode("PURP");
+            RemittanceBankBicCode = GetCode("BC");
 
             var ibanFromCode = AccountTokens.NormalizeIban(GetCode("IBAN"));
             var ibanFromAccount = AccountTokens.NormalizeIban(CounterpartyAccount);
@@ -104,6 +111,30 @@ namespace Mt940Parser
 
         /// <summary>Remittance information from REMI, or null.</summary>
         public string RemittanceInformation { get; }
+
+        /// <summary>DBS transaction description from ?TD?, or null.</summary>
+        public string TransactionDescription { get; }
+
+        /// <summary>DBS beneficiary name from ?BENM?, or null.</summary>
+        public string BeneficiaryName { get; }
+
+        /// <summary>DBS FPS proxy from ?PV?, or null.</summary>
+        public string FpsProxy { get; }
+
+        /// <summary>DBS payer name from ?ORDP?, or null.</summary>
+        public string PayerName { get; }
+
+        /// <summary>DBS transaction particular from ?OTH1?, or null.</summary>
+        public string TransParticular { get; }
+
+        /// <summary>DBS payment purpose code from ?PURP?, or null.</summary>
+        public string PaymentPurposeCode { get; }
+
+        /// <summary>
+        /// DBS remittance bank BIC code from ?BC?. The guide's credit example uses a short code such as 004.
+        /// Stored as written. Null when the prefix is absent.
+        /// </summary>
+        public string RemittanceBankBicCode { get; }
 
         /// <summary>Counterparty name from ?32 and ?33, otherwise NAME, BENM, or ORDP.</summary>
         public string CounterpartyName { get; }
