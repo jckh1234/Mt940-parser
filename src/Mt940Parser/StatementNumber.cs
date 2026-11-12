@@ -8,37 +8,62 @@ namespace Mt940Parser
     /// </summary>
     public sealed class StatementNumber
     {
+        private readonly string _raw;
+        private readonly string _number;
+        private readonly string _sequence;
+        private readonly int? _numberValue;
+        private readonly int? _sequenceValue;
+        private readonly string _sourceTag;
+
         /// <summary>
         /// Creates a statement number. <paramref name="number"/> and <paramref name="sequence"/> may be null
         /// when the raw value could not be split.
         /// </summary>
         public StatementNumber(string raw, string number, string sequence, string sourceTag)
         {
-            Raw = raw ?? string.Empty;
-            Number = string.IsNullOrEmpty(number) ? null : number;
-            Sequence = string.IsNullOrEmpty(sequence) ? null : sequence;
-            SourceTag = sourceTag ?? string.Empty;
-            NumberValue = ParseInt(Number);
-            SequenceValue = ParseInt(Sequence);
+            _raw = raw ?? string.Empty;
+            _number = string.IsNullOrEmpty(number) ? null : number;
+            _sequence = string.IsNullOrEmpty(sequence) ? null : sequence;
+            _sourceTag = sourceTag ?? string.Empty;
+            _numberValue = ParseInt(_number);
+            _sequenceValue = ParseInt(_sequence);
         }
 
         /// <summary>Original tag value.</summary>
-        public string Raw { get; }
+        public string Raw
+        {
+            get { return _raw; }
+        }
 
         /// <summary>Statement number text, including leading zeros. Null when the value is not numeric.</summary>
-        public string Number { get; }
+        public string Number
+        {
+            get { return _number; }
+        }
 
         /// <summary>Sequence text after the slash, including leading zeros. Null when omitted.</summary>
-        public string Sequence { get; }
+        public string Sequence
+        {
+            get { return _sequence; }
+        }
 
         /// <summary>Numeric statement number, or null when <see cref="Number"/> is absent.</summary>
-        public int? NumberValue { get; }
+        public int? NumberValue
+        {
+            get { return _numberValue; }
+        }
 
         /// <summary>Numeric sequence, or null when <see cref="Sequence"/> is absent.</summary>
-        public int? SequenceValue { get; }
+        public int? SequenceValue
+        {
+            get { return _sequenceValue; }
+        }
 
         /// <summary>":28:" or ":28C:".</summary>
-        public string SourceTag { get; }
+        public string SourceTag
+        {
+            get { return _sourceTag; }
+        }
 
         /// <summary>True when the tag was :28C:.</summary>
         public bool IsContinuationTag

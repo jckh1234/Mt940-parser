@@ -51,11 +51,11 @@ namespace Mt940Parser
             // CLOSE connection
 
             if (entry == null)
-                throw new ArgumentNullException(nameof(entry));
+                throw new ArgumentNullException("entry");
             if (string.IsNullOrWhiteSpace(connectionString))
-                throw new ArgumentException("Connection string is required.", nameof(connectionString));
+                throw new ArgumentException("Connection string is required.", "connectionString");
             if (string.IsNullOrWhiteSpace(entry.Field20AccountNumber))
-                throw new ArgumentException("Field 20 account is required.", nameof(entry));
+                throw new ArgumentException("Field 20 account is required.", "entry");
 
             var script = new StringBuilder();
             script.AppendLine("-- Pseudo-code insert. No database connection is opened.");

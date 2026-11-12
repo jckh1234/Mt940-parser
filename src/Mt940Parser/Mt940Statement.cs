@@ -7,6 +7,17 @@ namespace Mt940Parser
     /// </summary>
     public sealed class Mt940Statement
     {
+        private readonly string _transactionReference;
+        private readonly string _relatedReference;
+        private readonly AccountIdentification _account;
+        private readonly StatementNumber _statementNumber;
+        private readonly Balance _openingBalance;
+        private readonly Balance _closingBalance;
+        private readonly Balance _closingAvailableBalance;
+        private readonly IReadOnlyList<Balance> _forwardAvailableBalances;
+        private readonly IReadOnlyList<Mt940Transaction> _transactions;
+        private readonly Mt940Information _information;
+
         /// <summary>
         /// Creates a statement. List arguments are copied.
         /// </summary>
@@ -22,20 +33,23 @@ namespace Mt940Parser
             IEnumerable<Mt940Transaction> transactions,
             Mt940Information information)
         {
-            TransactionReference = string.IsNullOrEmpty(transactionReference) ? null : transactionReference;
-            RelatedReference = string.IsNullOrEmpty(relatedReference) ? null : relatedReference;
-            Account = account;
-            StatementNumber = statementNumber;
-            OpeningBalance = openingBalance;
-            ClosingBalance = closingBalance;
-            ClosingAvailableBalance = closingAvailableBalance;
-            ForwardAvailableBalances = CopyBalances(forwardAvailableBalances);
-            Transactions = CopyTransactions(transactions);
-            Information = information;
+            _transactionReference = string.IsNullOrEmpty(transactionReference) ? null : transactionReference;
+            _relatedReference = string.IsNullOrEmpty(relatedReference) ? null : relatedReference;
+            _account = account;
+            _statementNumber = statementNumber;
+            _openingBalance = openingBalance;
+            _closingBalance = closingBalance;
+            _closingAvailableBalance = closingAvailableBalance;
+            _forwardAvailableBalances = CopyBalances(forwardAvailableBalances);
+            _transactions = CopyTransactions(transactions);
+            _information = information;
         }
 
         /// <summary>Transaction reference from :20:.</summary>
-        public string TransactionReference { get; }
+        public string TransactionReference
+        {
+            get { return _transactionReference; }
+        }
 
         /// <summary>
         /// Account number from :20: under the DBS Hong Kong MT940 guide.
@@ -48,34 +62,61 @@ namespace Mt940Parser
         }
 
         /// <summary>Related reference from :21:. Null when the tag is absent.</summary>
-        public string RelatedReference { get; }
+        public string RelatedReference
+        {
+            get { return _relatedReference; }
+        }
 
         /// <summary>Account from :25:. Null when the tag is absent.</summary>
-        public AccountIdentification Account { get; }
+        public AccountIdentification Account
+        {
+            get { return _account; }
+        }
 
         /// <summary>Statement number from :28: or :28C:. Null when the tag is absent.</summary>
-        public StatementNumber StatementNumber { get; }
+        public StatementNumber StatementNumber
+        {
+            get { return _statementNumber; }
+        }
 
         /// <summary>Opening balance from :60F: or :60M:. Null when absent.</summary>
-        public Balance OpeningBalance { get; }
+        public Balance OpeningBalance
+        {
+            get { return _openingBalance; }
+        }
 
         /// <summary>Closing balance from :62F: or :62M:. Null when absent.</summary>
-        public Balance ClosingBalance { get; }
+        public Balance ClosingBalance
+        {
+            get { return _closingBalance; }
+        }
 
         /// <summary>Closing available balance from :64:. Null when absent.</summary>
-        public Balance ClosingAvailableBalance { get; }
+        public Balance ClosingAvailableBalance
+        {
+            get { return _closingAvailableBalance; }
+        }
 
         /// <summary>Forward available balances from :65:, in file order.</summary>
-        public IReadOnlyList<Balance> ForwardAvailableBalances { get; }
+        public IReadOnlyList<Balance> ForwardAvailableBalances
+        {
+            get { return _forwardAvailableBalances; }
+        }
 
         /// <summary>Statement lines in file order.</summary>
-        public IReadOnlyList<Mt940Transaction> Transactions { get; }
+        public IReadOnlyList<Mt940Transaction> Transactions
+        {
+            get { return _transactions; }
+        }
 
         /// <summary>
         /// Statement-level :86: text that was not attached to a transaction.
         /// Null when there is none.
         /// </summary>
-        public Mt940Information Information { get; }
+        public Mt940Information Information
+        {
+            get { return _information; }
+        }
 
         /// <summary>
         /// Currency of the opening balance, otherwise the closing balance, otherwise :64:.

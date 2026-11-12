@@ -26,8 +26,8 @@ namespace Mt940Parser
         public Mt940ParseException(string message, int lineNumber, string tag)
             : base(FormatMessage(message, lineNumber, tag))
         {
-            LineNumber = lineNumber;
-            Tag = tag;
+            _lineNumber = lineNumber;
+            _tag = tag;
         }
 
         /// <summary>
@@ -36,8 +36,8 @@ namespace Mt940Parser
         public Mt940ParseException(string message, int lineNumber, string tag, Exception innerException)
             : base(FormatMessage(message, lineNumber, tag), innerException)
         {
-            LineNumber = lineNumber;
-            Tag = tag;
+            _lineNumber = lineNumber;
+            _tag = tag;
         }
 
         /// <summary>
@@ -47,16 +47,25 @@ namespace Mt940Parser
             : base(info, context)
         {
             if (info == null)
-                throw new ArgumentNullException(nameof(info));
-            LineNumber = info.GetInt32("LineNumber");
-            Tag = info.GetString("Tag");
+                throw new ArgumentNullException("info");
+            _lineNumber = info.GetInt32("LineNumber");
+            _tag = info.GetString("Tag");
         }
 
+        private readonly int _lineNumber;
+        private readonly string _tag;
+
         /// <summary>1-based line of the tag that failed, or 0 if unknown.</summary>
-        public int LineNumber { get; }
+        public int LineNumber
+        {
+            get { return _lineNumber; }
+        }
 
         /// <summary>SWIFT tag including colons, such as ":61:", or null.</summary>
-        public string Tag { get; }
+        public string Tag
+        {
+            get { return _tag; }
+        }
 
         /// <summary>
         /// Stores <see cref="LineNumber"/> and <see cref="Tag"/> with the base exception data.
@@ -64,7 +73,7 @@ namespace Mt940Parser
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             if (info == null)
-                throw new ArgumentNullException(nameof(info));
+                throw new ArgumentNullException("info");
             base.GetObjectData(info, context);
             info.AddValue("LineNumber", LineNumber);
             info.AddValue("Tag", Tag);

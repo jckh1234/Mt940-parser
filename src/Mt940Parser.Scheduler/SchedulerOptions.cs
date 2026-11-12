@@ -15,24 +15,45 @@ namespace Mt940Parser.Scheduler
             + "\n"
             + "Exit codes: 0 success, 1 invalid arguments, 2 file not found, 3 parse error, 4 read error.";
 
+        private readonly bool _help;
+        private readonly string _sharedFolder;
+        private readonly string _accountNumber;
+        private readonly DateTime _statementDate;
+        private readonly string _connectionString;
+
         private SchedulerOptions(bool help, string sharedFolder, string accountNumber, DateTime statementDate, string connectionString)
         {
-            Help = help;
-            SharedFolder = sharedFolder;
-            AccountNumber = accountNumber;
-            StatementDate = statementDate.Date;
-            ConnectionString = connectionString;
+            _help = help;
+            _sharedFolder = sharedFolder;
+            _accountNumber = accountNumber;
+            _statementDate = statementDate.Date;
+            _connectionString = connectionString;
         }
 
-        public bool Help { get; }
+        public bool Help
+        {
+            get { return _help; }
+        }
 
-        public string SharedFolder { get; }
+        public string SharedFolder
+        {
+            get { return _sharedFolder; }
+        }
 
-        public string AccountNumber { get; }
+        public string AccountNumber
+        {
+            get { return _accountNumber; }
+        }
 
-        public DateTime StatementDate { get; }
+        public DateTime StatementDate
+        {
+            get { return _statementDate; }
+        }
 
-        public string ConnectionString { get; }
+        public string ConnectionString
+        {
+            get { return _connectionString; }
+        }
 
         public static bool TryParse(string[] args, out SchedulerOptions options, out string error)
         {

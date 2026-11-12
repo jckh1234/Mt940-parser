@@ -187,6 +187,12 @@ namespace Mt940Parser
     /// </summary>
     public sealed class DailyStatementResult
     {
+        private readonly int _exitCode;
+        private readonly string _filePath;
+        private readonly IReadOnlyList<string> _messages;
+        private readonly IReadOnlyList<DbsCreditEntry> _entries;
+        private readonly IReadOnlyList<string> _insertScripts;
+
         /// <summary>
         /// Creates a result. Lists are copied.
         /// </summary>
@@ -197,27 +203,42 @@ namespace Mt940Parser
             IEnumerable<DbsCreditEntry> entries,
             IEnumerable<string> insertScripts)
         {
-            ExitCode = exitCode;
-            FilePath = filePath;
-            Messages = CopyStrings(messages);
-            Entries = CopyEntries(entries);
-            InsertScripts = CopyStrings(insertScripts);
+            _exitCode = exitCode;
+            _filePath = filePath;
+            _messages = CopyStrings(messages);
+            _entries = CopyEntries(entries);
+            _insertScripts = CopyStrings(insertScripts);
         }
 
         /// <summary>Process exit code. Zero is success.</summary>
-        public int ExitCode { get; }
+        public int ExitCode
+        {
+            get { return _exitCode; }
+        }
 
         /// <summary>Statement path that was resolved, or null when the folder argument was rejected.</summary>
-        public string FilePath { get; }
+        public string FilePath
+        {
+            get { return _filePath; }
+        }
 
         /// <summary>Operator messages, in order.</summary>
-        public IReadOnlyList<string> Messages { get; }
+        public IReadOnlyList<string> Messages
+        {
+            get { return _messages; }
+        }
 
         /// <summary>Credit rows that were handed to the pseudo insert. Empty when the run did not insert.</summary>
-        public IReadOnlyList<DbsCreditEntry> Entries { get; }
+        public IReadOnlyList<DbsCreditEntry> Entries
+        {
+            get { return _entries; }
+        }
 
         /// <summary>Pseudo INSERT scripts, one per credit row.</summary>
-        public IReadOnlyList<string> InsertScripts { get; }
+        public IReadOnlyList<string> InsertScripts
+        {
+            get { return _insertScripts; }
+        }
 
         internal static DailyStatementResult Failed(int exitCode, string filePath, IList<string> messages)
         {

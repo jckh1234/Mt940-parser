@@ -51,7 +51,7 @@ namespace Mt940Parser
                 case DebitCreditMark.ExpectedDebit:
                     return "ED";
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(mark));
+                    throw new ArgumentOutOfRangeException("mark");
             }
         }
 

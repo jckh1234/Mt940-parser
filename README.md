@@ -1,6 +1,6 @@
 # MT940 Parser
 
-C# parser for SWIFT MT940 customer statements. The library targets **.NET Framework 4.8** and **C# 7.3**. It has no runtime dependencies. `Microsoft.NETFramework.ReferenceAssemblies` is a private build asset so the project can compile without a Framework targeting pack installed on the machine.
+C# parser for SWIFT MT940 customer statements. The library targets **.NET Framework 4.8** and **C# 5**. It has no runtime dependencies. `Microsoft.NETFramework.ReferenceAssemblies` is a private build asset so the project can compile without a Framework targeting pack installed on the machine.
 
 ## Build
 
@@ -39,8 +39,8 @@ foreach (Mt940Statement statement in document.Statements)
     foreach (Mt940Transaction transaction in statement.Transactions)
     {
         decimal signed = transaction.SignedAmount;          // negative for D, RC, ED
-        string purpose = transaction.Information?.Purpose;
-        string name = transaction.Information?.CounterpartyName;
+        string purpose = transaction.Information == null ? null : transaction.Information.Purpose;
+        string name = transaction.Information == null ? null : transaction.Information.CounterpartyName;
     }
 }
 ```

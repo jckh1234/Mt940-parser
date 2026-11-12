@@ -8,37 +8,54 @@ namespace Mt940Parser
     /// </summary>
     public sealed class DbsTransactionCode
     {
+        private readonly string _description;
+        private readonly string _creditDebit;
+        private readonly string _swiftCode;
+        private readonly string _code;
+
         /// <summary>
         /// Creates one appendix row. <paramref name="creditDebit"/> is <c>CR</c> or <c>DR</c>.
         /// </summary>
         public DbsTransactionCode(string description, string creditDebit, string swiftCode, string code)
         {
             if (string.IsNullOrEmpty(description))
-                throw new ArgumentException("Description is required.", nameof(description));
+                throw new ArgumentException("Description is required.", "description");
             if (string.IsNullOrEmpty(creditDebit))
-                throw new ArgumentException("Credit/debit mark is required.", nameof(creditDebit));
+                throw new ArgumentException("Credit/debit mark is required.", "creditDebit");
             if (string.IsNullOrEmpty(swiftCode))
-                throw new ArgumentException("SWIFT code is required.", nameof(swiftCode));
+                throw new ArgumentException("SWIFT code is required.", "swiftCode");
             if (string.IsNullOrEmpty(code))
-                throw new ArgumentException("DBS code is required.", nameof(code));
+                throw new ArgumentException("DBS code is required.", "code");
 
-            Description = description;
-            CreditDebit = creditDebit;
-            SwiftCode = swiftCode;
-            Code = code;
+            _description = description;
+            _creditDebit = creditDebit;
+            _swiftCode = swiftCode;
+            _code = code;
         }
 
         /// <summary>Transaction description in tag 86 (max 15 characters in the guide).</summary>
-        public string Description { get; }
+        public string Description
+        {
+            get { return _description; }
+        }
 
         /// <summary><c>CR</c> or <c>DR</c>.</summary>
-        public string CreditDebit { get; }
+        public string CreditDebit
+        {
+            get { return _creditDebit; }
+        }
 
         /// <summary>SWIFT transaction code used as tag 61 subfield 6, without the leading N.</summary>
-        public string SwiftCode { get; }
+        public string SwiftCode
+        {
+            get { return _swiftCode; }
+        }
 
         /// <summary>DBS transaction code used as tag 61 supplementary subfield 9.</summary>
-        public string Code { get; }
+        public string Code
+        {
+            get { return _code; }
+        }
     }
 
     /// <summary>
