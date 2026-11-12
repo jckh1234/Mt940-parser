@@ -40,10 +40,16 @@ namespace Mt940Parser
             { "VN", "Virtual Account Name" }
         };
 
+        private static readonly IReadOnlyDictionary<string, string> _fieldNames =
+            new ReadOnlyDictionary<string, string>(Names);
+
         /// <summary>
         /// DBS Field 86 prefix codes mapped to their field names.
         /// </summary>
-        public static IReadOnlyDictionary<string, string> FieldNames { get; } = new ReadOnlyDictionary<string, string>(Names);
+        public static IReadOnlyDictionary<string, string> FieldNames
+        {
+            get { return _fieldNames; }
+        }
 
         /// <summary>
         /// Returns the Appendix 2 field name for <paramref name="prefix"/>, or null when it is not a DBS prefix.

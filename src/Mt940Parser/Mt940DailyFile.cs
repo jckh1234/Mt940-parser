@@ -20,7 +20,7 @@ namespace Mt940Parser
         public static string GetPath(string sharedFolder, DateTime statementDate)
         {
             if (string.IsNullOrWhiteSpace(sharedFolder))
-                throw new ArgumentException("Shared folder is required.", nameof(sharedFolder));
+                throw new ArgumentException("Shared folder is required.", "sharedFolder");
             return Path.Combine(sharedFolder, GetFileName(statementDate));
         }
     }

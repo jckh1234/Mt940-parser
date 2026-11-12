@@ -12,13 +12,15 @@ namespace Mt940Parser
     /// </summary>
     public sealed class Mt940Document
     {
+        private readonly IReadOnlyList<Mt940Statement> _statements;
+
         /// <summary>
         /// Creates a document from statements that were already parsed. The sequence is copied.
         /// </summary>
         public Mt940Document(IEnumerable<Mt940Statement> statements)
         {
             if (statements == null)
-                throw new ArgumentNullException(nameof(statements));
+                throw new ArgumentNullException("statements");
 
             var copy = new List<Mt940Statement>();
             foreach (var statement in statements)
@@ -27,11 +29,14 @@ namespace Mt940Parser
                     copy.Add(statement);
             }
 
-            Statements = copy.AsReadOnly();
+            _statements = copy.AsReadOnly();
         }
 
         /// <summary>Statements in file order.</summary>
-        public IReadOnlyList<Mt940Statement> Statements { get; }
+        public IReadOnlyList<Mt940Statement> Statements
+        {
+            get { return _statements; }
+        }
 
         /// <summary>
         /// Parses MT940 text. Throws <see cref="Mt940ParseException"/> at the first problem.
@@ -39,7 +44,7 @@ namespace Mt940Parser
         public static Mt940Document Parse(string content)
         {
             if (content == null)
-                throw new ArgumentNullException(nameof(content));
+                throw new ArgumentNullException("content");
 
             IList<Mt940ParseException> errors;
             var document = ParseCore(content, out errors);
@@ -63,9 +68,9 @@ namespace Mt940Parser
         public static Mt940Document Parse(Stream stream, Encoding encoding)
         {
             if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
+                throw new ArgumentNullException("stream");
             if (encoding == null)
-                throw new ArgumentNullException(nameof(encoding));
+                throw new ArgumentNullException("encoding");
             return Parse(ReadAll(stream, encoding));
         }
 
@@ -109,7 +114,7 @@ namespace Mt940Parser
             out IList<Mt940ParseException> errors)
         {
             if (encoding == null)
-                throw new ArgumentNullException(nameof(encoding));
+                throw new ArgumentNullException("encoding");
             if (stream == null)
             {
                 document = new Mt940Document(new Mt940Statement[0]);

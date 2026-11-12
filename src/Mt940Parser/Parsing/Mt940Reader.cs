@@ -39,7 +39,7 @@ namespace Mt940Parser.Parsing
 
                 if (IsBoundary(trimmed))
                 {
-                    FlushTag();
+                    FlushTag(ref currentTag, currentTagLine, buffer, builder);
                     builder.Complete(statements);
                     continue;
                 }
@@ -50,7 +50,7 @@ namespace Mt940Parser.Parsing
                 var match = TagPattern.Match(trimmed);
                 if (match.Success)
                 {
-                    FlushTag();
+                    FlushTag(ref currentTag, currentTagLine, buffer, builder);
                     var tag = match.Groups[1].Value.ToUpperInvariant();
                     if (tag == "20" && builder.HasContent)
                         builder.Complete(statements);
@@ -73,22 +73,26 @@ namespace Mt940Parser.Parsing
                 buffer.Append(line);
             }
 
-            FlushTag();
+            FlushTag(ref currentTag, currentTagLine, buffer, builder);
             builder.Complete(statements);
 
             if (statements.Count == 0 && errors.Count == 0)
                 errors.Add(new Mt940ParseException("No MT940 statement was found.", 1, null));
 
             return new Mt940Document(statements);
+        }
 
-            void FlushTag()
-            {
-                if (currentTag == null)
-                    return;
-                builder.Apply(currentTag, buffer.ToString(), currentTagLine);
-                currentTag = null;
-                buffer.Clear();
-            }
+        private static void FlushTag(
+            ref string currentTag,
+            int currentTagLine,
+            StringBuilder buffer,
+            StatementBuilder builder)
+        {
+            if (currentTag == null)
+                return;
+            builder.Apply(currentTag, buffer.ToString(), currentTagLine);
+            currentTag = null;
+            buffer.Clear();
         }
 
         private static bool IsBoundary(string trimmed)

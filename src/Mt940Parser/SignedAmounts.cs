@@ -10,7 +10,7 @@ namespace Mt940Parser
         public static decimal Apply(decimal absoluteAmount, DebitCreditMark mark)
         {
             if (absoluteAmount < 0m)
-                throw new ArgumentOutOfRangeException(nameof(absoluteAmount));
+                throw new ArgumentOutOfRangeException("absoluteAmount");
 
             if (mark.IsNegative())
                 return decimal.Negate(absoluteAmount);

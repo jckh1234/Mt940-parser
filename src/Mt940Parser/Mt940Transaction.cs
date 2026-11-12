@@ -10,6 +10,21 @@ namespace Mt940Parser
     /// </summary>
     public sealed class Mt940Transaction
     {
+        private readonly DateTime _valueDate;
+        private readonly DateTime? _entryDate;
+        private readonly DebitCreditMark _mark;
+        private readonly string _fundsCode;
+        private readonly decimal _amount;
+        private readonly string _transactionType;
+        private readonly string _reference;
+        private readonly string _bankReference;
+        private readonly string _supplementaryDetails;
+        private readonly string _dbsTransactionCode;
+        private readonly string _supplementaryTimestamp;
+        private readonly string _termDepositAccount;
+        private readonly Mt940Information _information;
+        private readonly string _raw;
+
         /// <summary>
         /// Creates a transaction. <paramref name="amount"/> must be zero or positive.
         /// </summary>
@@ -27,49 +42,64 @@ namespace Mt940Parser
             string raw)
         {
             if (amount < 0m)
-                throw new ArgumentOutOfRangeException(nameof(amount));
+                throw new ArgumentOutOfRangeException("amount");
             if (string.IsNullOrEmpty(transactionType))
-                throw new ArgumentException("Transaction type is required.", nameof(transactionType));
+                throw new ArgumentException("Transaction type is required.", "transactionType");
 
-            ValueDate = valueDate.Date;
-            EntryDate = entryDate.HasValue ? entryDate.Value.Date : (DateTime?)null;
-            Mark = mark;
-            FundsCode = string.IsNullOrEmpty(fundsCode) ? null : fundsCode;
-            Amount = amount;
-            TransactionType = transactionType;
-            Reference = string.IsNullOrEmpty(reference) ? null : reference;
-            BankReference = string.IsNullOrEmpty(bankReference) ? null : bankReference;
-            SupplementaryDetails = string.IsNullOrEmpty(supplementaryDetails) ? null : supplementaryDetails;
-            Information = information;
-            Raw = raw ?? string.Empty;
+            _valueDate = valueDate.Date;
+            _entryDate = entryDate.HasValue ? entryDate.Value.Date : (DateTime?)null;
+            _mark = mark;
+            _fundsCode = string.IsNullOrEmpty(fundsCode) ? null : fundsCode;
+            _amount = amount;
+            _transactionType = transactionType;
+            _reference = string.IsNullOrEmpty(reference) ? null : reference;
+            _bankReference = string.IsNullOrEmpty(bankReference) ? null : bankReference;
+            _supplementaryDetails = string.IsNullOrEmpty(supplementaryDetails) ? null : supplementaryDetails;
+            _information = information;
+            _raw = raw ?? string.Empty;
 
             string dbsTransactionCode;
             string supplementaryTimestamp;
             string termDepositAccount;
             SupplementaryDetailsParser.Read(
-                SupplementaryDetails,
+                _supplementaryDetails,
                 out dbsTransactionCode,
                 out supplementaryTimestamp,
                 out termDepositAccount);
-            DbsTransactionCode = dbsTransactionCode;
-            SupplementaryTimestamp = supplementaryTimestamp;
-            TermDepositAccount = termDepositAccount;
+            _dbsTransactionCode = dbsTransactionCode;
+            _supplementaryTimestamp = supplementaryTimestamp;
+            _termDepositAccount = termDepositAccount;
         }
 
         /// <summary>Value date (YYMMDD).</summary>
-        public DateTime ValueDate { get; }
+        public DateTime ValueDate
+        {
+            get { return _valueDate; }
+        }
 
         /// <summary>Entry date (MMDD, year taken from the value date). Null when the field is omitted.</summary>
-        public DateTime? EntryDate { get; }
+        public DateTime? EntryDate
+        {
+            get { return _entryDate; }
+        }
 
         /// <summary>Debit/credit mark.</summary>
-        public DebitCreditMark Mark { get; }
+        public DebitCreditMark Mark
+        {
+            get { return _mark; }
+        }
 
         /// <summary>Optional funds code (third character of the currency). Null when omitted.</summary>
-        public string FundsCode { get; }
+        public string FundsCode
+        {
+            get { return _fundsCode; }
+        }
 
         /// <summary>Absolute amount. Zero or positive.</summary>
-        public decimal Amount { get; }
+        public decimal Amount
+        {
+            get { return _amount; }
+        }
 
         /// <summary>Amount with sign. Negative for debits, RC, and ED.</summary>
         public decimal SignedAmount
@@ -78,34 +108,55 @@ namespace Mt940Parser
         }
 
         /// <summary>Four-character transaction type, such as NTRF or NCHK.</summary>
-        public string TransactionType { get; }
+        public string TransactionType
+        {
+            get { return _transactionType; }
+        }
 
         /// <summary>Reference for the account owner. Null when absent. The literal NONREF is preserved.</summary>
-        public string Reference { get; }
+        public string Reference
+        {
+            get { return _reference; }
+        }
 
         /// <summary>Account-servicing institution reference (the // field). Null when absent.</summary>
-        public string BankReference { get; }
+        public string BankReference
+        {
+            get { return _bankReference; }
+        }
 
         /// <summary>Supplementary details from continuation lines of :61:. Null when absent.</summary>
-        public string SupplementaryDetails { get; }
+        public string SupplementaryDetails
+        {
+            get { return _supplementaryDetails; }
+        }
 
         /// <summary>
         /// DBS transaction code from supplementary details (<c>201?100913</c> → <c>201</c>).
         /// Null when the supplementary line is not <c>code?HHMMSS</c>.
         /// </summary>
-        public string DbsTransactionCode { get; }
+        public string DbsTransactionCode
+        {
+            get { return _dbsTransactionCode; }
+        }
 
         /// <summary>
         /// Posting timestamp (HHMMSS) from :61: supplementary details.
         /// For <c>201?100913</c> this is <c>100913</c>. Null when the line has no timestamp.
         /// </summary>
-        public string SupplementaryTimestamp { get; }
+        public string SupplementaryTimestamp
+        {
+            get { return _supplementaryTimestamp; }
+        }
 
         /// <summary>
         /// Term-deposit account number from supplementary details, when the bank sends a third
         /// <c>?</c> value after the timestamp. Null when absent.
         /// </summary>
-        public string TermDepositAccount { get; }
+        public string TermDepositAccount
+        {
+            get { return _termDepositAccount; }
+        }
 
         /// <summary>
         /// Appendix 1 description for <see cref="DbsTransactionCode"/>.
@@ -125,7 +176,10 @@ namespace Mt940Parser
         }
 
         /// <summary>:86: narrative attached to this line. Null when the line has no :86:.</summary>
-        public Mt940Information Information { get; }
+        public Mt940Information Information
+        {
+            get { return _information; }
+        }
 
         /// <summary>
         /// Customer reference from <see cref="Information"/>. DBS <c>?CREF?</c> wins over <c>?KREF?</c>.
@@ -137,7 +191,10 @@ namespace Mt940Parser
         }
 
         /// <summary>Original :61: body, including supplementary lines.</summary>
-        public string Raw { get; }
+        public string Raw
+        {
+            get { return _raw; }
+        }
 
         /// <summary>Returns the value date, mark, and signed amount.</summary>
         public override string ToString()

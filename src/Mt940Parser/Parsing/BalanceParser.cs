@@ -78,7 +78,7 @@ namespace Mt940Parser.Parsing
                 case "65":
                     return BalanceKind.ForwardAvailable;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(tag));
+                    throw new ArgumentOutOfRangeException("tag");
             }
         }
 

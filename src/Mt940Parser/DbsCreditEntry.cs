@@ -8,6 +8,18 @@ namespace Mt940Parser
     /// </summary>
     public sealed class DbsCreditEntry
     {
+        private readonly string _field20AccountNumber;
+        private readonly DateTime _valueDate;
+        private readonly decimal _amount;
+        private readonly string _supplementaryTimestamp;
+        private readonly string _transactionDescription;
+        private readonly string _fpsProxy;
+        private readonly string _payerName;
+        private readonly string _customerReference;
+        private readonly string _transParticular;
+        private readonly string _paymentPurposeCode;
+        private readonly string _remittanceBankBicCode;
+
         /// <summary>
         /// Creates a credit row. <paramref name="amount"/> is the Field 61 amount (zero or positive).
         /// </summary>
@@ -25,55 +37,88 @@ namespace Mt940Parser
             string remittanceBankBicCode)
         {
             if (string.IsNullOrWhiteSpace(field20AccountNumber))
-                throw new ArgumentException("Field 20 account number is required.", nameof(field20AccountNumber));
+                throw new ArgumentException("Field 20 account number is required.", "field20AccountNumber");
             if (amount < 0m)
-                throw new ArgumentOutOfRangeException(nameof(amount));
+                throw new ArgumentOutOfRangeException("amount");
 
-            Field20AccountNumber = field20AccountNumber.Trim();
-            ValueDate = valueDate.Date;
-            Amount = amount;
-            SupplementaryTimestamp = EmptyToNull(supplementaryTimestamp);
-            TransactionDescription = EmptyToNull(transactionDescription);
-            FpsProxy = EmptyToNull(fpsProxy);
-            PayerName = EmptyToNull(payerName);
-            CustomerReference = EmptyToNull(customerReference);
-            TransParticular = EmptyToNull(transParticular);
-            PaymentPurposeCode = EmptyToNull(paymentPurposeCode);
-            RemittanceBankBicCode = EmptyToNull(remittanceBankBicCode);
+            _field20AccountNumber = field20AccountNumber.Trim();
+            _valueDate = valueDate.Date;
+            _amount = amount;
+            _supplementaryTimestamp = EmptyToNull(supplementaryTimestamp);
+            _transactionDescription = EmptyToNull(transactionDescription);
+            _fpsProxy = EmptyToNull(fpsProxy);
+            _payerName = EmptyToNull(payerName);
+            _customerReference = EmptyToNull(customerReference);
+            _transParticular = EmptyToNull(transParticular);
+            _paymentPurposeCode = EmptyToNull(paymentPurposeCode);
+            _remittanceBankBicCode = EmptyToNull(remittanceBankBicCode);
         }
 
         /// <summary>Account number from :20:.</summary>
-        public string Field20AccountNumber { get; }
+        public string Field20AccountNumber
+        {
+            get { return _field20AccountNumber; }
+        }
 
         /// <summary>Field 61 value date.</summary>
-        public DateTime ValueDate { get; }
+        public DateTime ValueDate
+        {
+            get { return _valueDate; }
+        }
 
         /// <summary>Field 61 amount. Absolute, and positive for a credit.</summary>
-        public decimal Amount { get; }
+        public decimal Amount
+        {
+            get { return _amount; }
+        }
 
         /// <summary>Field 61 supplementary timestamp (HHMMSS). Null when the line has none.</summary>
-        public string SupplementaryTimestamp { get; }
+        public string SupplementaryTimestamp
+        {
+            get { return _supplementaryTimestamp; }
+        }
 
         /// <summary>Field 86 transaction description (?TD?). Null when absent.</summary>
-        public string TransactionDescription { get; }
+        public string TransactionDescription
+        {
+            get { return _transactionDescription; }
+        }
 
         /// <summary>Field 86 FPS proxy (?PV?). Null when absent.</summary>
-        public string FpsProxy { get; }
+        public string FpsProxy
+        {
+            get { return _fpsProxy; }
+        }
 
         /// <summary>Field 86 payer name (?ORDP?). Null when absent.</summary>
-        public string PayerName { get; }
+        public string PayerName
+        {
+            get { return _payerName; }
+        }
 
         /// <summary>Field 86 customer reference (?CREF?). Null when absent. ?KREF? is not used.</summary>
-        public string CustomerReference { get; }
+        public string CustomerReference
+        {
+            get { return _customerReference; }
+        }
 
         /// <summary>Field 86 transaction particular (?OTH1?). Null when absent.</summary>
-        public string TransParticular { get; }
+        public string TransParticular
+        {
+            get { return _transParticular; }
+        }
 
         /// <summary>Field 86 payment purpose code (?PURP?). Null when absent.</summary>
-        public string PaymentPurposeCode { get; }
+        public string PaymentPurposeCode
+        {
+            get { return _paymentPurposeCode; }
+        }
 
         /// <summary>Field 86 remittance bank BIC code (?BC?). Null when absent.</summary>
-        public string RemittanceBankBicCode { get; }
+        public string RemittanceBankBicCode
+        {
+            get { return _remittanceBankBicCode; }
+        }
 
         /// <summary>
         /// Credit lines whose statement :20: equals <paramref name="field20AccountNumber"/>.
@@ -88,13 +133,13 @@ namespace Mt940Parser
             out int skippedNonCreditLines)
         {
             if (document == null)
-                throw new ArgumentNullException(nameof(document));
+                throw new ArgumentNullException("document");
             if (field20AccountNumber == null)
-                throw new ArgumentNullException(nameof(field20AccountNumber));
+                throw new ArgumentNullException("field20AccountNumber");
 
             var account = field20AccountNumber.Trim();
             if (account.Length == 0)
-                throw new ArgumentException("Field 20 account number is required.", nameof(field20AccountNumber));
+                throw new ArgumentException("Field 20 account number is required.", "field20AccountNumber");
 
             skippedOtherStatements = 0;
             skippedNonCreditLines = 0;

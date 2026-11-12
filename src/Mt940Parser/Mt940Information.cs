@@ -14,6 +14,32 @@ namespace Mt940Parser
     /// </summary>
     public sealed class Mt940Information
     {
+        private readonly string _raw;
+        private readonly string _transactionCode;
+        private readonly IReadOnlyDictionary<string, string> _germanFields;
+        private readonly IReadOnlyDictionary<string, string> _codeFields;
+        private readonly string _bookingText;
+        private readonly string _primanota;
+        private readonly string _purpose;
+        private readonly string _sepaPurpose;
+        private readonly string _remittanceInformation;
+        private readonly string _transactionDescription;
+        private readonly string _beneficiaryName;
+        private readonly string _fpsProxy;
+        private readonly string _payerName;
+        private readonly string _transParticular;
+        private readonly string _paymentPurposeCode;
+        private readonly string _remittanceBankBicCode;
+        private readonly string _counterpartyName;
+        private readonly string _counterpartyBankCode;
+        private readonly string _counterpartyAccount;
+        private readonly string _counterpartyIban;
+        private readonly string _counterpartyBic;
+        private readonly string _endToEndReference;
+        private readonly string _customerReference;
+        private readonly string _mandateReference;
+        private readonly string _creditorIdentifier;
+
         /// <summary>
         /// Creates narrative details. Dictionaries are copied.
         /// </summary>
@@ -23,153 +49,228 @@ namespace Mt940Parser
             IDictionary<string, string> germanFields,
             IDictionary<string, string> codeFields)
         {
-            Raw = raw ?? string.Empty;
-            TransactionCode = string.IsNullOrEmpty(transactionCode) ? null : transactionCode;
-            GermanFields = Copy(germanFields);
-            CodeFields = Copy(codeFields);
+            _raw = raw ?? string.Empty;
+            _transactionCode = string.IsNullOrEmpty(transactionCode) ? null : transactionCode;
+            _germanFields = Copy(germanFields);
+            _codeFields = Copy(codeFields);
 
-            BookingText = GetGerman("00");
-            Primanota = GetGerman("10");
-            CounterpartyBankCode = GetGerman("30");
-            CounterpartyAccount = GetGerman("31");
+            _bookingText = GetGerman("00");
+            _primanota = GetGerman("10");
+            _counterpartyBankCode = GetGerman("30");
+            _counterpartyAccount = GetGerman("31");
 
             var germanName = ConcatGerman(32, 33);
-            CounterpartyName = germanName ?? FirstCode("NAME", "BENM", "ORDP");
+            _counterpartyName = germanName ?? FirstCode("NAME", "BENM", "ORDP");
 
-            EndToEndReference = GetCode("EREF");
-            CustomerReference = GetCode(DbsField86Prefixes.CustomerReferencePrefix) ?? GetCode("KREF");
-            MandateReference = GetCode("MREF");
-            CreditorIdentifier = GetCode("CRED");
-            SepaPurpose = GetCode("SVWZ");
-            RemittanceInformation = GetCode("REMI");
-            TransactionDescription = GetCode("TD");
-            BeneficiaryName = GetCode("BENM");
-            FpsProxy = GetCode("PV");
-            PayerName = GetCode("ORDP");
-            TransParticular = GetCode("OTH1");
-            PaymentPurposeCode = GetCode("PURP");
-            RemittanceBankBicCode = GetCode("BC");
+            _endToEndReference = GetCode("EREF");
+            _customerReference = GetCode(DbsField86Prefixes.CustomerReferencePrefix) ?? GetCode("KREF");
+            _mandateReference = GetCode("MREF");
+            _creditorIdentifier = GetCode("CRED");
+            _sepaPurpose = GetCode("SVWZ");
+            _remittanceInformation = GetCode("REMI");
+            _transactionDescription = GetCode("TD");
+            _beneficiaryName = GetCode("BENM");
+            _fpsProxy = GetCode("PV");
+            _payerName = GetCode("ORDP");
+            _transParticular = GetCode("OTH1");
+            _paymentPurposeCode = GetCode("PURP");
+            _remittanceBankBicCode = GetCode("BC");
 
             var ibanFromCode = AccountTokens.NormalizeIban(GetCode("IBAN"));
-            var ibanFromAccount = AccountTokens.NormalizeIban(CounterpartyAccount);
+            var ibanFromAccount = AccountTokens.NormalizeIban(_counterpartyAccount);
             if (ibanFromCode != null)
-                CounterpartyIban = ibanFromCode;
+                _counterpartyIban = ibanFromCode;
             else if (ibanFromAccount != null)
-                CounterpartyIban = ibanFromAccount;
+                _counterpartyIban = ibanFromAccount;
 
             var bicFromCode = AccountTokens.NormalizeBic(GetCode("BIC"));
-            var bicFromBank = AccountTokens.NormalizeBic(CounterpartyBankCode);
+            var bicFromBank = AccountTokens.NormalizeBic(_counterpartyBankCode);
             if (bicFromCode != null)
-                CounterpartyBic = bicFromCode;
+                _counterpartyBic = bicFromCode;
             else if (bicFromBank != null)
-                CounterpartyBic = bicFromBank;
+                _counterpartyBic = bicFromBank;
 
             var germanPurpose = ConcatGerman(20, 29);
-            if (!string.IsNullOrEmpty(SepaPurpose))
-                Purpose = SepaPurpose;
+            if (!string.IsNullOrEmpty(_sepaPurpose))
+                _purpose = _sepaPurpose;
             else if (!string.IsNullOrEmpty(germanPurpose))
-                Purpose = germanPurpose;
-            else if (!string.IsNullOrEmpty(RemittanceInformation))
-                Purpose = RemittanceInformation;
-            else if (GermanFields.Count == 0 && CodeFields.Count == 0)
+                _purpose = germanPurpose;
+            else if (!string.IsNullOrEmpty(_remittanceInformation))
+                _purpose = _remittanceInformation;
+            else if (_germanFields.Count == 0 && _codeFields.Count == 0)
             {
-                var trimmed = Raw.Trim();
-                Purpose = trimmed.Length == 0 ? null : CollapseNewlines(trimmed);
+                var trimmed = _raw.Trim();
+                _purpose = trimmed.Length == 0 ? null : CollapseNewlines(trimmed);
             }
         }
 
         /// <summary>Original :86: body. Line wraps are preserved.</summary>
-        public string Raw { get; }
+        public string Raw
+        {
+            get { return _raw; }
+        }
 
         /// <summary>Leading three-digit German business-transaction code (GVC), or null.</summary>
-        public string TransactionCode { get; }
+        public string TransactionCode
+        {
+            get { return _transactionCode; }
+        }
 
         /// <summary>German <c>?XX</c> fields. Keys are two digits ("00", "20"). Repeated codes are concatenated.</summary>
-        public IReadOnlyDictionary<string, string> GermanFields { get; }
+        public IReadOnlyDictionary<string, string> GermanFields
+        {
+            get { return _germanFields; }
+        }
 
         /// <summary>
         /// <c>?CODE?</c> and <c>CODE+</c> fields, including every DBS Appendix 2 prefix
         /// (<see cref="DbsField86Prefixes"/>). Keys are uppercase codes such as "CREF", "OTH1", "EREF", and "SVWZ".
         /// The <c>?</c> form wins when the same code appears in both forms.
         /// </summary>
-        public IReadOnlyDictionary<string, string> CodeFields { get; }
+        public IReadOnlyDictionary<string, string> CodeFields
+        {
+            get { return _codeFields; }
+        }
 
         /// <summary>Posting text from ?00.</summary>
-        public string BookingText { get; }
+        public string BookingText
+        {
+            get { return _bookingText; }
+        }
 
         /// <summary>Primanota from ?10.</summary>
-        public string Primanota { get; }
+        public string Primanota
+        {
+            get { return _primanota; }
+        }
 
         /// <summary>
         /// Best purpose text: ?SVWZ? or SVWZ+, otherwise ?20 through ?29 concatenated,
         /// otherwise ?REMI?, otherwise the whole narrative when it has no codes.
         /// </summary>
-        public string Purpose { get; }
+        public string Purpose
+        {
+            get { return _purpose; }
+        }
 
         /// <summary>SEPA purpose from SVWZ, or null.</summary>
-        public string SepaPurpose { get; }
+        public string SepaPurpose
+        {
+            get { return _sepaPurpose; }
+        }
 
         /// <summary>Remittance information from REMI, or null.</summary>
-        public string RemittanceInformation { get; }
+        public string RemittanceInformation
+        {
+            get { return _remittanceInformation; }
+        }
 
         /// <summary>DBS transaction description from ?TD?, or null.</summary>
-        public string TransactionDescription { get; }
+        public string TransactionDescription
+        {
+            get { return _transactionDescription; }
+        }
 
         /// <summary>DBS beneficiary name from ?BENM?, or null.</summary>
-        public string BeneficiaryName { get; }
+        public string BeneficiaryName
+        {
+            get { return _beneficiaryName; }
+        }
 
         /// <summary>DBS FPS proxy from ?PV?, or null.</summary>
-        public string FpsProxy { get; }
+        public string FpsProxy
+        {
+            get { return _fpsProxy; }
+        }
 
         /// <summary>DBS payer name from ?ORDP?, or null.</summary>
-        public string PayerName { get; }
+        public string PayerName
+        {
+            get { return _payerName; }
+        }
 
         /// <summary>DBS transaction particular from ?OTH1?, or null.</summary>
-        public string TransParticular { get; }
+        public string TransParticular
+        {
+            get { return _transParticular; }
+        }
 
         /// <summary>DBS payment purpose code from ?PURP?, or null.</summary>
-        public string PaymentPurposeCode { get; }
+        public string PaymentPurposeCode
+        {
+            get { return _paymentPurposeCode; }
+        }
 
         /// <summary>
         /// DBS remittance bank BIC code from ?BC?. The guide's credit example uses a short code such as 004.
         /// Stored as written. Null when the prefix is absent.
         /// </summary>
-        public string RemittanceBankBicCode { get; }
+        public string RemittanceBankBicCode
+        {
+            get { return _remittanceBankBicCode; }
+        }
 
         /// <summary>Counterparty name from ?32 and ?33, otherwise NAME, BENM, or ORDP.</summary>
-        public string CounterpartyName { get; }
+        public string CounterpartyName
+        {
+            get { return _counterpartyName; }
+        }
 
         /// <summary>Raw ?30 bank code (BLZ or BIC).</summary>
-        public string CounterpartyBankCode { get; }
+        public string CounterpartyBankCode
+        {
+            get { return _counterpartyBankCode; }
+        }
 
         /// <summary>Raw ?31 account number or IBAN.</summary>
-        public string CounterpartyAccount { get; }
+        public string CounterpartyAccount
+        {
+            get { return _counterpartyAccount; }
+        }
 
         /// <summary>Counterparty IBAN from ?IBAN? or from ?31 when that field is an IBAN.</summary>
-        public string CounterpartyIban { get; }
+        public string CounterpartyIban
+        {
+            get { return _counterpartyIban; }
+        }
 
         /// <summary>Counterparty BIC from ?BIC? or from ?30 when that field is a BIC.</summary>
-        public string CounterpartyBic { get; }
+        public string CounterpartyBic
+        {
+            get { return _counterpartyBic; }
+        }
 
         /// <summary>End-to-end reference (EREF).</summary>
-        public string EndToEndReference { get; }
+        public string EndToEndReference
+        {
+            get { return _endToEndReference; }
+        }
 
         /// <summary>
         /// Customer reference. DBS <c>?CREF?</c> when that prefix is present, otherwise <c>?KREF?</c>.
         /// </summary>
-        public string CustomerReference { get; }
+        public string CustomerReference
+        {
+            get { return _customerReference; }
+        }
 
         /// <summary>Mandate reference (MREF).</summary>
-        public string MandateReference { get; }
+        public string MandateReference
+        {
+            get { return _mandateReference; }
+        }
 
         /// <summary>Creditor scheme identifier (CRED).</summary>
-        public string CreditorIdentifier { get; }
+        public string CreditorIdentifier
+        {
+            get { return _creditorIdentifier; }
+        }
 
         /// <summary>Returns the ?XX field, or null.</summary>
         public string GetGermanField(string code)
         {
             if (code == null)
-                throw new ArgumentNullException(nameof(code));
+                throw new ArgumentNullException("code");
             return GetGerman(code);
         }
 
@@ -177,7 +278,7 @@ namespace Mt940Parser
         public string GetCodeField(string code)
         {
             if (code == null)
-                throw new ArgumentNullException(nameof(code));
+                throw new ArgumentNullException("code");
             return GetCode(code.ToUpperInvariant());
         }
 

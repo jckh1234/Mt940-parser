@@ -11,68 +11,93 @@ namespace Mt940Parser
     /// </summary>
     public sealed class AccountIdentification
     {
+        private readonly string _raw;
+        private readonly string _bankCode;
+        private readonly string _accountNumber;
+        private readonly string _accountName;
+        private readonly string _iban;
+        private readonly string _bic;
+
         /// <summary>
         /// Parses an account identification. The raw value is kept; bank code, IBAN, and account name are filled when recognized.
         /// </summary>
         public AccountIdentification(string raw)
         {
-            Raw = raw == null ? string.Empty : raw.Trim();
-            if (Raw.Length == 0)
+            _raw = raw == null ? string.Empty : raw.Trim();
+            if (_raw.Length == 0)
                 return;
 
-            var parts = SplitSlashes(Raw);
+            var parts = SplitSlashes(_raw);
             if (parts.Count >= 3)
             {
                 // DBS option iii: BIC / account number / account name.
-                BankCode = EmptyToNull(parts[0]);
-                AccountNumber = EmptyToNull(parts[1]);
-                AccountName = EmptyToNull(JoinTail(parts, 2));
+                _bankCode = EmptyToNull(parts[0]);
+                _accountNumber = EmptyToNull(parts[1]);
+                _accountName = EmptyToNull(JoinTail(parts, 2));
             }
             else if (parts.Count == 2 && IsDbsAccountAndName(parts[0], parts[1]))
             {
                 // DBS option iv: account number / account name (guide example :25:388888888/ABC COMPANY).
-                AccountNumber = EmptyToNull(parts[0]);
-                AccountName = EmptyToNull(parts[1]);
+                _accountNumber = EmptyToNull(parts[0]);
+                _accountName = EmptyToNull(parts[1]);
             }
             else if (parts.Count == 2)
             {
-                BankCode = EmptyToNull(parts[0]);
-                AccountNumber = EmptyToNull(parts[1]);
+                _bankCode = EmptyToNull(parts[0]);
+                _accountNumber = EmptyToNull(parts[1]);
             }
             else
             {
-                AccountNumber = EmptyToNull(parts[0]);
+                _accountNumber = EmptyToNull(parts[0]);
             }
 
-            var accountCompact = AccountTokens.Compact(AccountNumber);
+            var accountCompact = AccountTokens.Compact(_accountNumber);
             if (AccountTokens.IsIban(accountCompact))
-                Iban = accountCompact;
+                _iban = accountCompact;
 
-            var bankCompact = AccountTokens.Compact(BankCode);
+            var bankCompact = AccountTokens.Compact(_bankCode);
             if (AccountTokens.IsBic(bankCompact))
-                Bic = bankCompact;
+                _bic = bankCompact;
         }
 
         /// <summary>Original :25: value, trimmed.</summary>
-        public string Raw { get; }
+        public string Raw
+        {
+            get { return _raw; }
+        }
 
         /// <summary>Text before the first slash, such as a BLZ or BIC. Null when there is no slash.</summary>
-        public string BankCode { get; }
+        public string BankCode
+        {
+            get { return _bankCode; }
+        }
 
         /// <summary>Text after the slash, or the whole value when there is no slash.</summary>
-        public string AccountNumber { get; }
+        public string AccountNumber
+        {
+            get { return _accountNumber; }
+        }
 
         /// <summary>
         /// Account name from DBS Field 25 when the value is <c>BIC/account/name</c> or <c>account/name</c>.
         /// Null for <c>bank/account</c> and for an account number alone.
         /// </summary>
-        public string AccountName { get; }
+        public string AccountName
+        {
+            get { return _accountName; }
+        }
 
         /// <summary>Account number when it is an IBAN, otherwise null. Spaces are removed.</summary>
-        public string Iban { get; }
+        public string Iban
+        {
+            get { return _iban; }
+        }
 
         /// <summary>Bank code when it is a BIC, otherwise null.</summary>
-        public string Bic { get; }
+        public string Bic
+        {
+            get { return _bic; }
+        }
 
         /// <summary>Returns <see cref="Raw"/>.</summary>
         public override string ToString()
